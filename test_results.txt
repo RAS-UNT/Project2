@@ -60,3 +60,34 @@ collision diagnostics, graph/BFS, department tree, and required repeating-menu
 tests remain pending implementation. Later steps must add the corresponding
 Section 10 test inputs, expected results, actual results, and pass/fail records.
 WSL/GCC and Windows results do not satisfy the separate CELL verification rule.
+
+
+PROJECT 2 TEST RESULTS - MEMBER B (CAMPUS GRAPH, BFS, SHORTEST PATH, CONNECTIVITY REPORT)
+
+Scope: CampusGraph class (include/CampusGraph.h, src/CampusGraph.cpp) only.
+Environment: Linux, g++ -std=c++11 -Wall -Wextra -Wpedantic, no warnings.
+Method: a small test driver (test_graph_main.cpp) loads buildings.txt and connections.txt from a
+given directory and offers the graph menu options. Each test below was run by feeding a prepared
+input file to the driver. Directories: data = instructor files; bad, tie, empty = Member B's own files.
+These results were produced in a Linux environment. A re-run by Member B on a local machine and on
+the UNT CSE CELL machines is still pending.
+
+Test | Description and input | Expected | Actual | Result
+G01 | View graph, data | Observatory shows (no connections); neighbors in insertion order | 7 buildings and 6 connections accepted; Library: Student Union, Business Building; Observatory: (no connections) | PASS
+G02 | Counts and degrees, data | 7 buildings, 6 connections, Student Union degree 3, Observatory 0 | Matched; degrees 2,3,2,1,2,2,0 | PASS
+G03 | BFS from "library" (lowercase), data | 6 of 7; Engineering Building at distance 3 | Matched; start at distance 0, Reachable: 6 of 7 buildings | PASS
+G04 | BFS from Observatory (isolated), data | Only Observatory, 1 of 7 | Matched | PASS
+G05 | BFS from unknown building Mars, data | Error, back to menu | Error: unknown building 'Mars'. | PASS
+G06 | BFS with blank name, data | Blank-name error, back to menu | Error: building name cannot be blank. | PASS
+G07 | Bad files (duplicate building by capitalization, wrong field counts, reversed duplicate, self-connection, unknown buildings, empty field, Windows line endings), bad | Each rejection reported with filename, line number, reason | buildings.txt 4 accepted, 2 rejected; connections.txt 2 accepted, 7 rejected; every warning showed filename, line number and reason | PASS
+G08 | Connectivity report with multiple components, bad | 2 connected components | Connected components: 2 | PASS
+G09 | Shortest path, start equals destination (Library to Library), data | Library and 0 connections | Matched | PASS
+G10 | Shortest path, unknown start (Mars to Gym), data | Unknown start building error | Error: unknown start building 'Mars'. | PASS
+G11 | Shortest path, unknown destination (Gym to Mars), data | Unknown destination building error | Error: unknown destination building 'Mars'. | PASS
+G12 | Shortest path, no route (Library to Observatory), data | No-path message | No path exists between Library and Observatory. | PASS
+G13 | Two equal-length routes (Library to Gym), data | Library, Student Union, Gym; 2 connections | Matched | PASS
+G14 | Two equal-length routes in Member B's own test data (A to D), tie | A, B, D; 2 connections (B is A's first neighbor) | Matched | PASS
+G15 | Connectivity report with a tie for highest degree, tie | Highest degree (2): A, B, C, D; no isolated buildings; 1 component | Matched; Total connections: 4 | PASS
+G16 | Connectivity report with an isolated building, data | Highest degree (3): Student Union; Isolated: Observatory; 2 components | Matched | PASS
+G17 | Missing buildings.txt and connections.txt (directory does not exist) | Error naming each file, 0 accepted, no crash | Both errors printed; 0 accepted, 0 rejected; menu options reported "No buildings are loaded." | PASS
+G18 | Empty files, empty | Empty-state messages, zero totals, no crash | "No buildings are loaded." and zero totals printed; components 0 | PASS
