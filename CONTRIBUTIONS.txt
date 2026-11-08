@@ -11,6 +11,18 @@ Rami Badr:
 - Verified 35 foundation checks and four startup checks under WSL/GCC, all five
   registered CTest suites under MSVC, and SHA256 matches for the four data files.
 
+Completed work - Step 2 (facilities-hash branch)
+Rami Badr:
+- Implemented HashTable with a custom polynomial string hash, normalized IDs,
+  separate chains, duplicate rejection, and accepted record order.
+- Added capacity, entry, and collision diagnostics with a documented counting
+  rule that excludes rejected duplicate and invalid IDs.
+- Added a separate four-file collision test directory without changing data/.
+- Added 2,063 table checks and 15 collision-fixture checks, including all 1,000
+  valid IDs in a one-bucket table and case-insensitive duplicate protection.
+- Verified all seven CTest suites, WSL/GCC builds, and hash-test sanitizer runs.
+- Updated build instructions, the hash design, and recorded test results.
+
 Proposed ownership, not yet confirmed by all members:
 - Rami: facilities, custom ID hash table, and facility ID lookup.
 - Graph/BFS owner: awaiting team confirmation.

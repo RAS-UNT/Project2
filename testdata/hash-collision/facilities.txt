@@ -1,0 +1,6 @@
+# FacilityID|FacilityName|BuildingName|Category
+F001|First Collision Facility|Test Building|Test Category
+f014|Second Collision Facility|Test Building|Test Category
+F027|Third Collision Facility|Test Building|Test Category
+ f014 | Duplicate Rejected | Test Building | Rejected Category
+BadID|Invalid Rejected|Test Building|Test Category

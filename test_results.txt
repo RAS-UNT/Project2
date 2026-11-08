@@ -1,7 +1,7 @@
-PROJECT 2 TEST RESULTS - STEP 1
+PROJECT 2 TEST RESULTS - STEPS 1 AND 2
 
 Date: 2026-11-08
-Scope: Step 1 foundation only, not a completed Milestone 1.
+Scope: Step 1 foundation and Step 2 custom hash table, not a completed Milestone 1.
 
 BUILD ENVIRONMENTS
 Local Linux: Ubuntu under WSL2, GCC 13.3.0, C++17.
@@ -46,17 +46,69 @@ Expected: byte-for-byte match for buildings.txt, connections.txt, facilities.txt
 and departments.txt. Actual: all four matched. Result: PASS.
 These are integrity checks, not claims that file-loading validation is complete.
 
-ADDITIONAL CMAKE/CTEST CHECK
-All five registered suites passed under Windows/MSVC:
+STEP 1 CMAKE/CTEST CHECK
+The initial five registered suites passed under Windows/MSVC:
 - facility_foundation (the same 35 assertions)
 - default_data_directory
 - alternate_data_directory
 - extra_arguments_rejected
 - blank_data_directory_rejected
 
+STEP 2 CUSTOM HASH TABLE VERIFICATION
+Date: 2026-11-08. Builds and tests passed under local WSL/GCC 13.3.0 and
+Windows/MSVC 19.51.36243.0, using C++17. GCC emitted no compilation warnings.
+
+Commands used from the project root:
+  g++ -std=c++17 -Wall -Wextra -pedantic -Iinclude tests/HashTableTests.cpp src/Facility.cpp src/TextUtils.cpp src/HashTable.cpp -o build/linux/hash_table_tests
+  ./build/linux/hash_table_tests
+  ./build/linux/hash_table_tests testdata/hash-collision
+
+Actual output:
+  All 2063 hash-table checks passed.
+  facilities.txt: accepted=3 rejected=2 capacity=17 entries=3 collisions=2
+  All 15 hash-table checks passed.
+
+Test | Description and input | Expected | Actual | Result
+H01 | Empty default table and missing/invalid lookup | Capacity 17; entries 0; collisions 0; not found | Matched | PASS
+H02 | Constructor capacity 0 | invalid_argument; no modulo by zero | Exception caught | PASS
+H03 | Insert padded lowercase f001 and search case-insensitively | Stored F001; all fields retained; caller unchanged | Matched | PASS
+H04 | Insert uppercase duplicate F001 with different fields | Original complete record retained; counters unchanged | Matched | PASS
+H05 | Accept F001, f014, F027 at capacity 17 | Three entries in one bucket; two collisions | Matched | PASS
+H06 | Lookup first, middle, and last collision-chain records | All three found | Matched | PASS
+H07 | Reject padded lowercase f014 after collisions | First F014 retained; collisions remain 2 | Matched | PASS
+H08 | Empty, whitespace, bad prefix/length/digits, internal space, and suffix | Invalid inserts/lookups rejected; entries/collisions unchanged | Matched | PASS
+H09 | Search valid but missing F999 | nullptr without counter changes | Matched | PASS
+H10 | Add F002 with same name as another ID | Both records retained; no new collision in its empty bucket | Matched | PASS
+H11 | Inspect records in non-bucket insertion order | F001, F014, F027, F002 | Matched | PASS
+H12 | Display diagnostics after H10 | capacity=17 entries=4 collisions=2; state unchanged | Matched | PASS
+H13 | Copy and assign a populated table | Correct independent lookup, storage, and counters | Matched | PASS
+H14 | Insert every valid F000-F999 into a capacity-1 table, then find each | 1000 entries; 999 collisions; all IDs found | Matched | PASS
+H15 | Insert duplicate f999 into long chain | Rejected; 1000 entries and 999 collisions remain | Matched | PASS
+H16 | Load own testdata/hash-collision/facilities.txt in hash-test driver | Three accepted, two rejected, 17 buckets, three entries, two collisions | Matched | PASS
+H17 | Inspect F014 after fixture duplicate with Rejected Category | Second Collision Facility and Test Category retained | Matched | PASS
+
+The collision fixture contains all four campus-format files for later integrated
+testing. At this step the hash-test driver reads only its facilities.txt; it
+does not replace the upcoming building/reference validation or campus loader.
+Each rejected fixture record was checked to leave entry/collision counts intact.
+
+All seven CTest suites passed on the Step 2 source. The original five still
+passed, plus facility_hash_table and hash_collision_fixture. Standard assertions
+are not used for these checks, so Release builds retain all test conditions.
+
+MEMORY AND UNDEFINED-BEHAVIOR CHECK
+Commands run under WSL/GCC:
+  g++ -std=c++17 -Wall -Wextra -pedantic -g -fsanitize=address,undefined -fno-omit-frame-pointer -Iinclude tests/HashTableTests.cpp src/Facility.cpp src/TextUtils.cpp src/HashTable.cpp -o build/linux/hash_table_sanitized
+  ASAN_OPTIONS=detect_leaks=1 ./build/linux/hash_table_sanitized
+  ASAN_OPTIONS=detect_leaks=1 ./build/linux/hash_table_sanitized testdata/hash-collision
+Expected: normal exit, all checks pass, no sanitizer diagnostics.
+Actual: both runs exited 0, with all checks passing and no sanitizer diagnostics.
+Result: PASS. This is a local Linux check, not execution on UNT CSE CELL.
+
 REMAINING MILESTONE 1 TESTS
-File-loading acceptance/rejection and load summaries, custom hash lookup and
-collision diagnostics, graph/BFS, department tree, and required repeating-menu
-tests remain pending implementation. Later steps must add the corresponding
+Full campus file-loading acceptance/rejection, load summaries and menu ID-search
+integration, graph/BFS, department tree, and repeating-menu tests remain pending
+implementation. Table-level lookup and collision diagnostics are verified above.
+Later steps must add the corresponding
 Section 10 test inputs, expected results, actual results, and pass/fail records.
 WSL/GCC and Windows results do not satisfy the separate CELL verification rule.

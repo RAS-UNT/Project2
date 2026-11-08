@@ -1,4 +1,4 @@
-PROJECT 2 DESIGN - STEP 1
+PROJECT 2 DESIGN - STEP 2
 
 IMPLEMENTED FOUNDATION
 Facility is a record with ID, name, building, and category strings. Display
@@ -16,10 +16,59 @@ main.cpp currently handles startup and the optional data-directory argument.
 The default is data/ relative to the working directory. No absolute campus
 data path or sample records are embedded in the application.
 
+CUSTOM FACILITY ID HASH TABLE
+HashTable owns an insertion-ordered vector of Facility records and a vector of
+buckets. Each bucket is a growing vector of record indices, implementing
+separate chaining without fixed chain limits or manual heap-node ownership.
+String/vector ownership automatically releases storage. Copies keep their own
+records and matching bucket indices.
+
+The initial bucket count is the named DEFAULT_CAPACITY constant, currently 17,
+or a positive constructor parameter. Zero capacity throws invalid_argument.
+Capacity counts buckets, not maximum records. Chains grow dynamically, so there
+is no full-table rejection or arbitrary record limit and no resizing is needed.
+
+IDs are trimmed and uppercased before validation, hashing, insertion, lookup,
+and duplicate comparison. The manually implemented string hash is:
+  h0 = 0
+  h(i+1) = (31 * h(i) + unsigned ASCII value of key[i]) modulo capacity
+The final h is the bucket index. No std::hash or library hash container is used.
+Both insert and find manually scan only the selected bucket's record indices.
+
+Separate chaining was chosen because it handles collisions without probing,
+does not become full when entries exceed the bucket count, and works directly
+with dynamically sized standard vectors. Accepted records remain in input order
+independently of bucket order, supporting the required later facility display.
+
+One collision is counted for each accepted insertion into a bucket that already
+contains at least one record. It is not one collision per comparison. Duplicate
+or invalid IDs do not change the first record, entry count, or collision count.
+The counter changes only after both the record and chain index are stored;
+record insertion is rolled back if allocating the chain index fails.
+
+insert returns Inserted, DuplicateId, or InvalidId. find returns a const pointer
+or nullptr. Callers distinguish an invalid search from a valid missing search
+using isValidFacilityId. Returned record pointers can expire after a later
+accepted insertion grows the record vector. records() supplies a read-only
+sequence for future display/name/category scans, never for ID lookup.
+
+Capacity, entries, and accepted-insertion collisions are available separately
+and through displayDiagnostics, ready to append to the facilities load summary.
+The independent hash-test fixture in testdata/hash-collision contains F001,
+f014, and F027, which normalize into bucket 11 at capacity 17. A duplicate and
+an invalid ID are rejected; the observed diagnostic is capacity=17 entries=3
+collisions=2. Full application file loading is not claimed by this test driver.
+
+For n entries, b buckets, and load factor alpha = n/b, lookup and duplicate
+checking take expected O(1 + alpha) time for distributed keys and O(n) worst
+case in one bucket. Hashing takes O(k) for a key of length k, fixed at four for
+valid IDs. Accepted append work is amortized O(1), plus copying record text.
+Storage is O(b + n), plus the record strings. Constructor initialization is O(b).
+
 NOT YET IMPLEMENTED
-The custom hash function, hash-table capacity, collision strategy and collision
-counting definition must be implemented and documented in the next facilities
-step. No hash lookup or collision demonstration is claimed in this version.
+FacilityDatabase loading will validate field counts, nonempty fields, known
+building references, and accepted category spelling before/around insertion.
+The table itself validates IDs; it is not a campus-reference validator.
 
 The graph and department-tree modules await ownership confirmation. Their
 representations, file loading, BFS, and required menu integration must be added
