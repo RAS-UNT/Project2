@@ -1,4 +1,4 @@
-PROJECT 2 DESIGN - STEP 2
+PROJECT 2 DESIGN - STEP 3
 
 IMPLEMENTED FOUNDATION
 Facility is a record with ID, name, building, and category strings. Display
@@ -38,7 +38,7 @@ Both insert and find manually scan only the selected bucket's record indices.
 Separate chaining was chosen because it handles collisions without probing,
 does not become full when entries exceed the bucket count, and works directly
 with dynamically sized standard vectors. Accepted records remain in input order
-independently of bucket order, supporting the required later facility display.
+independently of bucket order, supporting the required facility display.
 
 One collision is counted for each accepted insertion into a bucket that already
 contains at least one record. It is not one collision per comparison. Duplicate
@@ -65,11 +65,35 @@ case in one bucket. Hashing takes O(k) for a key of length k, fixed at four for
 valid IDs. Accepted append work is amortized O(1), plus copying record text.
 Storage is O(b + n), plus the record strings. Constructor initialization is O(b).
 
-NOT YET IMPLEMENTED
-FacilityDatabase loading will validate field counts, nonempty fields, known
-building references, and accepted category spelling before/around insertion.
-The table itself validates IDs; it is not a campus-reference validator.
+FACILITY DATABASE
+FacilityDatabase owns the ID table and accepts the graph's vector of accepted
+building names. It does not implement a second building loader or graph. Each
+load replaces prior facility data, preserving the configured bucket capacity.
+Missing files leave the database empty and print both an error and zero summary.
 
-The graph and department-tree modules await ownership confirmation. Their
-representations, file loading, BFS, and required menu integration must be added
-before Milestone 1. This foundation does not replace those requirements.
+The loader reads complete lines, skips blank/comment lines, and validates field
+count, required text, normalized ID format, and an accepted building reference.
+It stores the graph's first accepted building spelling and only then attempts
+hash insertion. Each rejection prints filename, physical line number, and reason.
+Every load attempt prints accepted/rejected counts, capacity, entries, collisions.
+
+Category spelling is found by scanning only earlier accepted records. No rejected
+record can register a category. This is a category comparison, not an ID lookup;
+findById and displaySearchById always delegate ID lookup to HashTable::find.
+Ordered display reuses records() and displayFacility for complete records and
+computed totals. Search clearly distinguishes invalid, not found, and found.
+Pointers returned by the database expire on its next load, including failed loads.
+
+For f facility lines, b accepted buildings and n accepted facilities, loading
+uses O(f*b + f*n) comparisons in the worst case, plus parsing record text. This
+includes building/category scans and worst-case hash chains. Display is O(n)
+plus output length; ID lookup keeps the table's expected O(1 + alpha) bound.
+
+NOT YET INTEGRATED
+The startup entry point does not yet call FacilityDatabase or provide the menu.
+The facilities component is verified independently; Step 4 must connect it to
+the shared graph and tree startup/menu with the required file loading order.
+
+The graph and department-tree implementations remain outside this branch's
+completed scope. Their representations, file loading, BFS, and menu integration
+must be added before Milestone 1. This module does not replace those requirements.

@@ -1,7 +1,8 @@
-// Purpose: Implements case-insensitive facility ID normalization and validation.
+// Purpose: Implements facility ID validation and shared record display.
 // Author: Rami Badr
 #include "Facility.h"
 #include "TextUtils.h"
+#include <ostream>
 
 // Uses the same case and whitespace rules for file IDs and user-entered IDs.
 std::string normalizeFacilityId(const std::string& id) {
@@ -16,4 +17,12 @@ bool isValidFacilityId(const std::string& id) {
         if (key[index] < '0' || key[index] > '9') return false;
     }
     return true;
+}
+
+// Shares one record format between facility lists and ID-search results.
+void displayFacility(const Facility& facility, std::ostream& output) {
+    output << "ID: " << facility.id << '\n'
+           << "Name: " << facility.name << '\n'
+           << "Building: " << facility.building << '\n'
+           << "Category: " << facility.category << '\n';
 }

@@ -1,7 +1,7 @@
-PROJECT 2 TEST RESULTS - STEPS 1 AND 2
+PROJECT 2 TEST RESULTS - STEPS 1 THROUGH 3
 
 Date: 2026-11-08
-Scope: Step 1 foundation and Step 2 custom hash table, not a completed Milestone 1.
+Scope: foundations, custom hashing, and the facilities component; not a completed Milestone 1.
 
 BUILD ENVIRONMENTS
 Local Linux: Ubuntu under WSL2, GCC 13.3.0, C++17.
@@ -105,10 +105,61 @@ Expected: normal exit, all checks pass, no sanitizer diagnostics.
 Actual: both runs exited 0, with all checks passing and no sanitizer diagnostics.
 Result: PASS. This is a local Linux check, not execution on UNT CSE CELL.
 
+STEP 3 FACILITY DATABASE VERIFICATION
+Date: 2026-11-08. Local WSL/GCC 13.3.0 and Windows/MSVC 19.51 builds passed.
+GCC used -std=c++17 -Wall -Wextra -pedantic without compilation warnings.
+
+Commands used from the project root:
+  mkdir -p build/linux/facility-database-tests
+  g++ -std=c++17 -Wall -Wextra -pedantic -Iinclude tests/FacilityDatabaseTests.cpp src/Facility.cpp src/TextUtils.cpp src/HashTable.cpp src/FacilityDatabase.cpp -o build/linux/facility_database_tests
+  ./build/linux/facility_database_tests . build/linux/facility-database-tests
+
+Actual output included:
+  Warning: ./testdata/hash-collision/facilities.txt:5: duplicate facility ID 'F014'
+  Warning: ./testdata/hash-collision/facilities.txt:6: invalid facility ID; use F followed by exactly three digits
+  ./testdata/hash-collision/facilities.txt: accepted=3 rejected=2 capacity=17 entries=3 collisions=2
+  All 91 facility-database checks passed.
+
+Test | Description and input | Expected | Actual | Result
+F01 | Empty database display | Clear message, total 0, unchanged counters | Matched | PASS
+F02 | Blank, wrong prefix/length, nondigit, space, and suffixed search IDs | Invalid-format message explaining F plus three digits | Matched | PASS
+F03 | Valid missing ID entered as padded lowercase f999 | Facility F999 was not found | Matched | PASS
+F04 | Load instructor facilities with instructor building names | Ten accepted; none rejected; 17 buckets; ten entries; zero collisions | Matched | PASS
+F05 | Instructor records F005 and F007 share Room 101 name | Both records retained with different buildings | Matched | PASS
+F06 | Search padded lowercase f004 | All fields shown with uppercase F004 and canonical building/category | Matched | PASS
+F07 | Display all instructor facilities | Ten records and total 10; queries do not change counters | Matched | PASS
+F08 | Load testdata/facility-validation | Seven accepted; twelve rejected; seven entries; three collisions | Matched | PASS
+F09 | Every rejected fixture line | Twelve warnings, each with filename, correct physical line number, and reason | Matched | PASS
+F10 | Duplicate ID with replacement name/category | First complete record retained; no rejected-category spelling registered | Matched | PASS
+F11 | Unknown-building record followed by same ID and new category spelling | Rejected record reserves neither ID nor spelling; later valid record accepted | Matched | PASS
+F12 | Field whitespace, blank/comment lines, lowercase ID, embedded # | Correct trimming/normalization; comments ignored; Room #5 retained | Matched | PASS
+F13 | Building case differences and internal double space | Accepted building spelling reused; North Annex does not match North  Annex | Matched | PASS
+F14 | Category case differences | First accepted Computer Lab spelling reused | Matched | PASS
+F15 | Mixed fixture accepted order | F001, F014, F027, F002, F028, F030, F034 in both records and display; total 7 | Matched | PASS
+F16 | CRLF copy derived from mixed fixture under build/ | Same 7/12 counts, three collisions, clean canonical field text | Matched | PASS
+F17 | Load collision fixture through FacilityDatabase, not hash-only driver | Three accepted, two rejected, 17 buckets, three entries, two collisions | Matched | PASS
+F18 | No accepted buildings supplied | All five collision-file records rejected; zero entries and collisions | Matched | PASS
+F19 | Load again after rejected-only input; repeat the same file | Correct fresh-load counts each time; no cumulative duplicates/collisions | Matched | PASS
+F20 | Missing facilities file after a successful load | Named error, opened=false, zero summary and empty database | Matched | PASS
+F21 | Empty facilities file | opened=true, zero accepted/rejected records, empty database | Matched | PASS
+F22 | Valid load after missing/empty files | Ten accepted, no rejections, working lookup | Matched | PASS
+F23 | Load instructor facilities with capacity 1 | Ten entries, nine collisions, capacity stays 1 | Matched | PASS
+
+All eight registered CTest suites passed: the previous seven plus facility_database.
+Existing foundation and hash tests also passed again under WSL/GCC. Test input
+files were read from data/ and testdata/; only a derived CRLF copy was written
+under build/. The instructor files were not changed.
+
+Facility database sanitizer commands:
+  g++ -std=c++17 -Wall -Wextra -pedantic -g -fsanitize=address,undefined -fno-omit-frame-pointer -Iinclude tests/FacilityDatabaseTests.cpp src/Facility.cpp src/TextUtils.cpp src/HashTable.cpp src/FacilityDatabase.cpp -o build/linux/facility_database_sanitized
+  ASAN_OPTIONS=detect_leaks=1 ./build/linux/facility_database_sanitized . build/linux/facility-database-tests
+Expected: all checks pass with normal exit and no sanitizer diagnostics.
+Actual: all 91 checks passed, exit 0, no sanitizer diagnostics. Result: PASS.
+
 REMAINING MILESTONE 1 TESTS
-Full campus file-loading acceptance/rejection, load summaries and menu ID-search
-integration, graph/BFS, department tree, and repeating-menu tests remain pending
-implementation. Table-level lookup and collision diagnostics are verified above.
-Later steps must add the corresponding
+Shared building/connection/department loaders, graph/BFS, department tree, all
+four-file startup summaries, and repeating-menu/input-recovery tests remain
+pending integration. Facility-component validation, display, ID lookup, and
+collision load summaries are verified above. Later steps must add the corresponding
 Section 10 test inputs, expected results, actual results, and pass/fail records.
 WSL/GCC and Windows results do not satisfy the separate CELL verification rule.

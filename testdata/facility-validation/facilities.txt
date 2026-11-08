@@ -1,0 +1,22 @@
+# FacilityID|FacilityName|BuildingName|Category
+
+ f001 | Room #5 | test building | Computer Lab
+F014|Same Name| west wing | computer lab
+F027|Same Name|Test Building|Classroom
+ f014 | Replacement | West Wing | Rejected Category
+F002|Unknown Building|Missing Building|Poisoned Category
+F003|   |Test Building|Classroom
+F004|Missing Category|Test Building|
+F005|Too Few|Test Building
+F006|Too Many|Test Building|Classroom|Extra
+X007|Bad ID|Test Building|Lab
+f002|Valid After Rejection|TEST BUILDING|poisoned category
+F028|After Duplicate|West Wing|rejected category
+F029|Middle Empty||Classroom
+F030|Internal Space Match|North  Annex|Classroom
+F031|Internal Space Mismatch|North Annex|Classroom
+F032|Trailing Empty|Test Building|
+|No ID|Test Building|Lab
+F033|Extra Trailing Pipe|Test Building|Lab|
+F034|Valid Last| West Wing | COMPUTER LAB
+  # Trailing comment

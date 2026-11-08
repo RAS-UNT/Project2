@@ -1,8 +1,9 @@
-// Purpose: Defines facility records and the required facility ID format.
+// Purpose: Defines facility records, ID rules, and shared record display.
 // Author: Rami Badr
 #ifndef FACILITY_H
 #define FACILITY_H
 
+#include <iosfwd>
 #include <string>
 
 struct Facility {
@@ -17,5 +18,8 @@ std::string normalizeFacilityId(const std::string& id);
 
 // Accepts exactly F followed by three ASCII digits after normalization.
 bool isValidFacilityId(const std::string& id);
+
+// Displays all four fields of an accepted, normalized facility record.
+void displayFacility(const Facility& facility, std::ostream& output);
 
 #endif

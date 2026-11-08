@@ -23,6 +23,18 @@ Rami Badr:
 - Verified all seven CTest suites, WSL/GCC builds, and hash-test sanitizer runs.
 - Updated build instructions, the hash design, and recorded test results.
 
+Completed work - Step 3 (facilities-hash branch)
+Rami Badr:
+- Implemented FacilityDatabase::loadFromFile with field/ID/reference validation,
+  filename/line/reason warnings, load summaries, and hash diagnostics.
+- Preserved accepted file order, canonical building names, first accepted
+  category spelling, and the original record after duplicate-ID rejection.
+- Added displayFacility, displayAll, displaySearchById, and hash-based findById.
+- Added mixed-validation and empty test directories plus a generated CRLF test.
+- Verified 91 facility-database checks, all eight CTest suites, and a clean
+  address/undefined-behavior sanitizer run under WSL/GCC.
+- Documented the accepted-building-list API for graph/menu integration.
+
 Proposed ownership, not yet confirmed by all members:
 - Rami: facilities, custom ID hash table, and facility ID lookup.
 - Graph/BFS owner: awaiting team confirmation.
