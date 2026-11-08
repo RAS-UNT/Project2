@@ -8,6 +8,8 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 add_library(facility_core src/Facility.cpp src/TextUtils.cpp)
 target_include_directories(facility_core PUBLIC include)
+add_library(graph_core src/CampusGraph.cpp)
+target_include_directories(graph_core PUBLIC include)
 
 add_executable(campus src/main.cpp)
 target_link_libraries(campus PRIVATE facility_core)
