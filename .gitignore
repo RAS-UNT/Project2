@@ -2,9 +2,15 @@ build/
 *.exe
 *.o
 *.obj
+*.a
+*.lib
+*.out
 *.pdb
 *.ilk
 .vs/
 .vscode/
 .idea/
 CMakeUserPresets.json
+/campus
+__pycache__/
+*.pyc

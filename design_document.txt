@@ -67,4 +67,4 @@ names with spaces; isolated integer parsing rejects blanks, text, decimals,
 suffixes, overflow, and out-of-range choices without damaging the input stream.
 End of input exits cleanly. Component and scripted application tests cover
 validation, ordering, collisions, BFS, tree operations, and recovery.
-Actual UNT CSE CELL verification and final packaging remain Step 5 work.
+Actual UNT CSE CELL verification remains pending; local tests are not CELL proof.

@@ -4,9 +4,10 @@ Repository: https://github.com/RAS-UNT/Project2
 
 PURPOSE AND STATUS
 C++17 console application for campus facility lookup, graph exploration,
-BFS reachability, and department hierarchy management. Step 4 connects all
-Milestone 1 modules and menu operations. Step 5 submission checks, actual CELL
-verification, and the final matching ZIP are still pending.
+BFS reachability, and department hierarchy management. All Milestone 1 modules
+and menu operations are integrated and locally verified. The source is prepared
+for submission packaging from main. Actual UNT CSE CELL verification remains
+pending and must be completed before submission.
 
 MODULE OWNERS
 Rami Badr: facilities, custom ID hash table, and shared application integration.
@@ -28,7 +29,7 @@ Run tests:
   cd ..
 
 Nine component/startup suites are always registered. A working Python 3
-interpreter adds the tenth suite, containing 55 full-application menu cases.
+interpreter adds the tenth suite, containing 60 full-application menu cases.
 
 BUILD AND TEST WITHOUT CMAKE ON LINUX
 The application itself needs only a C++17 compiler:
@@ -40,7 +41,7 @@ For all component and menu checks, using GCC and Python 3:
   bash tests/run_linux_checks.sh
 
 The script builds under build/linux and runs the four component executables,
-the collision fixture, and all 55 application menu cases. You can also run:
+the collision fixture, and all 60 application menu cases. You can also run:
   python3 tests/MenuIntegrationTests.py build/linux/campus
 
 STARTUP AND DATA
@@ -125,3 +126,23 @@ See test_results.txt for recorded results and remaining verification.
 Before submitting, commit/push the final source, test on CELL, and create the
 ZIP from that committed source so required files match the GitHub repository.
 Do not include executables or build directories.
+
+CELL CHECK
+After connecting to an actual UNT CSE CELL machine, use the final main branch.
+For a fresh checkout:
+  git clone https://github.com/RAS-UNT/Project2.git Project2-check
+  cd Project2-check
+
+For an existing clean checkout instead, enter that directory and update it:
+  git switch main
+  git pull --ff-only origin main
+
+Then record the machine, revision, compiler, and actual result:
+  hostname
+  git rev-parse --short HEAD
+  g++ --version
+  bash tests/run_linux_checks.sh
+
+The script requires GCC and Python 3. If Python 3 is unavailable, use the direct
+application build above, run its menu manually, and run the C++ component tests
+through CMake when available. Do not label WSL output as a CELL result.

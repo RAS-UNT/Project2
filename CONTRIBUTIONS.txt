@@ -61,7 +61,7 @@ Completed work - Aqani (department-tree branch):
 
 Completed work - Step 4 integration (Rami Badr):
 - Combined main at 63e35d2 and department-tree at 1a4e424 with facilities-hash,
-  preserving both module histories for the integration merge commit.
+  preserving both module histories in merge commit fc9ab93.
 - Wired the required four-file loading order and nine-choice Milestone 1 menu
   with option 0 exit, complete-line input, strict numeric parsing, and EOF exit.
 - Connected the graph's accepted building names to facility validation.
@@ -76,3 +76,17 @@ Completed work - Step 4 integration (Rami Badr):
   and a reproducible Linux check script. All 10 CTest suites passed on Windows;
   all Linux checks and the full-menu sanitizer run passed. CELL is still pending.
 - Reconciled the shared design conflict and updated README/test evidence.
+
+Completed work - Step 5 local submission audit (Rami Badr):
+- Confirmed Step 4 commit fc9ab93 was pushed and fast-forwarded main while
+  retaining the full commit ancestry from all three members.
+- Audited Milestone 1 requirements against the source, documented tests, and
+  data files. No additional production-code changes were needed for this step.
+- Added graph-components test data and five additional regression cases for
+  multiple disconnected graph components, an isolated custom building,
+  three-child insertion-order preorder, and missing-building recovery.
+- Rebuilt and verified all component checks and 60 full-application menu cases
+  locally under WSL/GCC, plus all ten Windows CTest suites.
+- Verified all four instructor files against the original ZIP using SHA256.
+- Updated build/submission guidance and artifact exclusions. Actual CELL
+  execution will be performed separately; no CELL pass is claimed here.

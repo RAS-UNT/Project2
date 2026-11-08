@@ -122,6 +122,19 @@ def main():
             expected=("facilities.txt: accepted=3 rejected=2 capacity=17 entries=3 collisions=2",
                       "Name: Second Collision Facility", "Total facilities: 3"))
 
+        components = root / "testdata" / "graph-components"
+        run("disconnected_north_pair", "5\nnorth hub\n0\n", directory=components,
+            expected=("North Hub (distance 0)", "South Hub (distance 1)", "Reachable: 2 of 5 buildings"),
+            rejected=("East Wing (distance", "West Wing (distance", "Lone Tower (distance"))
+        run("disconnected_east_pair", "5\nEast Wing\n0\n", directory=components,
+            expected=("East Wing (distance 0)", "West Wing (distance 1)", "Reachable: 2 of 5 buildings"),
+            rejected=("North Hub (distance", "South Hub (distance"))
+        run("custom_isolated_building", "5\nLone Tower\n0\n", directory=components,
+            expected=("Lone Tower (distance 0)", "Reachable: 1 of 5 buildings"))
+        run("general_tree_unsorted_sibling_order", "9\n7\nCampus Offices\n0\n", directory=components,
+            expected=("Campus Offices\nZeta Unit\nZeta Child\nAlpha Unit\nBeta Unit\n",
+                      "Parent: None\nChildren: 3\nDepth: 0"))
+
         windows = work / "windows data"
         windows.mkdir()
         for path in data.glob("*.txt"):
@@ -143,6 +156,16 @@ def main():
             directory=missing_departments, expected=("departments.txt: 0 accepted, 0 rejected",
             'Added "Replacement Root" as the root department.', "Parent: None\nChildren: 0\nDepth: 0"),
             rejected=("Enter parent department name:",))
+        missing_buildings = work / "missing-buildings"
+        missing_buildings.mkdir()
+        for path in data.glob("*.txt"):
+            if path.name != "buildings.txt":
+                (missing_buildings / path.name).write_bytes(path.read_bytes())
+        run("missing_buildings_reference_recovery", "4\n1\n7\nUniversity\n0\n", directory=missing_buildings,
+            expected=("buildings.txt: 0 accepted, 0 rejected", "connections.txt: 0 accepted, 6 rejected",
+                      "facilities.txt: accepted=0 rejected=10 capacity=17 entries=0 collisions=0",
+                      "departments.txt: 7 accepted, 0 rejected", "Total facilities: 0",
+                      "Department: University\nParent: None\nChildren: 2\nDepth: 0"))
         reserved = work / "department-named-none"
         reserved.mkdir()
         for name in ("buildings.txt", "connections.txt", "facilities.txt"):

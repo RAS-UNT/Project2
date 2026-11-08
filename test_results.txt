@@ -1,8 +1,8 @@
-PROJECT 2 TEST RESULTS - STEPS 1 THROUGH 4
+PROJECT 2 TEST RESULTS - MILESTONE 1 SUBMISSION AUDIT
 
 Date: 2026-11-08
-Scope: integrated Milestone 1 components and menu. Actual CELL verification and
-final submission packaging remain pending.
+Scope: integrated Milestone 1 components, menu, and final local audit.
+Actual UNT CSE CELL execution remains pending; no CELL pass is claimed.
 
 BUILD ENVIRONMENTS
 Local Linux: Ubuntu under WSL2, GCC 13.3.0, C++17.
@@ -200,7 +200,8 @@ STEP 4 INTEGRATED APPLICATION VERIFICATION
 Date: 2026-11-08. Inputs: unchanged instructor data/, plus the team's static
 testdata/ fixtures and isolated generated cases under ignored build/.
 Branches combined: facilities-hash 1f23e66, main 63e35d2 (Sulav's graph), and
-department-tree 1a4e424 (Aqani's tree). The integration commit is not yet made.
+department-tree 1a4e424 (Aqani's tree). The integration was committed and pushed
+as fc9ab93.
 
 Actual verification:
 - WSL/Ubuntu GCC 13.3.0, -std=c++17 -Wall -Wextra -pedantic: clean compilation.
@@ -254,6 +255,48 @@ locations now match CMake; malformed-fixture physical lines match its tests;
 missing department files print a zero-count summary; plain preorder is distinct
 from hierarchy; a real parent named NONE is not mistaken for a new root marker.
 
-Final Step 5 still requires a submission audit, actual UNT CSE CELL compilation
-and execution, and a ZIP built from the final committed/pushed source matching
-GitHub. No remote CELL pass is claimed by these local checks.
+At the Step 4 handoff, the remaining work was the submission audit, actual CELL
+verification, and packaging from committed/pushed source. The completed local
+audit is recorded below; actual CELL execution remains pending.
+
+STEP 5 LOCAL SUBMISSION AUDIT
+Date: 2026-11-08. Step 4 production source baseline: fc9ab93. This step adds
+test coverage and submission documentation without changing production C++.
+
+Reproduction: bash tests/run_linux_checks.sh
+Actual final local results:
+- GCC 13.3.0, C++17, -Wall -Wextra -pedantic: clean application/test builds.
+- All 35 foundation, 2063 hash-table, 15 collision-fixture, 91 facility-database,
+  and 34 department component checks passed.
+- All 60 integrated application menu cases passed.
+- All ten Windows/MSVC Release CTest suites passed.
+- SHA256 comparison of buildings.txt, connections.txt, facilities.txt, and
+  departments.txt against the instructor's original data (1).zip: all matched.
+- Final sanitized application: all 60 menu cases passed with leak detection
+  and address/undefined-behavior checks enabled; no sanitizer diagnostics.
+- Header include names were checked with case-sensitive comparison for native
+  Linux portability; every C++ source/header has purpose and author comments.
+
+The original 55 integration cases remain as recorded above. Added cases:
+Test | Description and input | Expected | Actual | Result
+A01 | graph-components, BFS from North Hub | North Hub distance 0, South Hub distance 1, reachable 2/5; no other component visited | Matched | PASS
+A02 | Same data, BFS from East Wing | East Wing distance 0, West Wing distance 1, reachable 2/5; North/South excluded | Matched | PASS
+A03 | Same data, BFS from Lone Tower | Only Lone Tower, distance 0, reachable 1/5 | Matched | PASS
+A04 | Same data, preorder and root search | Campus Offices, Zeta Unit, Zeta Child, Alpha Unit, Beta Unit; root has 3 children and depth 0 | Matched | PASS
+A05 | Only buildings.txt missing, with other instructor files present | Graph has no accepted buildings, six connections rejected, ten facilities rejected, seven departments still load/search correctly | Matched | PASS
+
+Milestone 1 Section 10 coverage map:
+- File loading: P01-P10, F04/F08-F23, I01/I14/I17/I19-I21, A05.
+- Duplicate building/facility IDs and unknown references: H04/H07, F09-F11,
+  I17/I18; accepted/rejected counts and warning locations are checked.
+- ID search and collision evidence: H01-H17, F02-F07/F17, I03-I05/I18.
+- BFS connected/isolated/unknown/multiple components: I08/I09, A01-A03.
+- Empty/root-only/general tree, search/add/preorder: I10-I16/I22, A04 and the
+  DepartmentTreeTests component driver.
+- Menu errors, names with spaces, repeated recovery, and EOF: I05/I09-I13,
+  I23-I26 and the component menu checks.
+
+CELL STATUS
+Pending user execution on an actual UNT CSE CELL machine. Run the commands in
+README.txt and record hostname, tested commit, compiler version, and the actual
+test output. Local Linux/Windows passes are not a substitute for this step.
