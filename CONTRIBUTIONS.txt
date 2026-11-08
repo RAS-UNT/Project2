@@ -13,10 +13,16 @@ Rami Badr:
 
 Proposed ownership, not yet confirmed by all members:
 - Rami: facilities, custom ID hash table, and facility ID lookup.
-- Graph/BFS owner: awaiting team confirmation.
+- Sulav: campus graph, BFS reachability, shortest path, and connectivity report.
 - Department-tree owner: awaiting team confirmation.
 
 Other team members: Aqani and Sulav Bhattarai.
 Record their owned modules and completed work after they confirm and contribute.
 Shared loading/menu integration, tests, and documentation will be recorded as
 they are completed. This file must reflect actual work, not planned credit.
+
+Completed work - Sulav Bhattarai (Member B):
+- Added CampusGraph (include/CampusGraph.h, src/CampusGraph.cpp): adjacency-list graph.
+- Added buildings.txt and connections.txt loading with validation and warnings.
+- Added graph display, counts and degrees, BFS reachability, shortest path, and connectivity report.
+- Added the graph_core library to CMakeLists.txt.
