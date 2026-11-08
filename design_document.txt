@@ -1,99 +1,70 @@
-PROJECT 2 DESIGN - STEP 3
+PROJECT 2 DESIGN - MILESTONE 1 INTEGRATION
 
-IMPLEMENTED FOUNDATION
-Facility is a record with ID, name, building, and category strings. Display
-spelling remains separate from normalized comparison keys. ID normalization
-trims outer whitespace and uppercases ASCII letters before format validation.
-Valid IDs contain F followed by exactly three digits, including F000.
+MODULES AND LOADING
+main.cpp constructs CampusGraph, FacilityDatabase, and DepartmentTree, loads
+buildings, connections, facilities, then departments, and runs the menu.
+The optional data-directory argument defaults to data/ relative to the current
+directory. Files are never rewritten. Missing files report errors and zero
+summaries; later files and the menu still run. TextUtils trims outer whitespace
+including CRLF, preserves internal spaces, splits complete pipe records while
+retaining empty fields, and normalizes ASCII comparison keys.
 
-TextUtils provides consistent rules for all future loaders and name searches.
-Trimming handles whitespace including tabs and carriage returns. Internal
-spaces are preserved and significant. Pipe splitting retains empty fields,
-including trailing fields, so loaders can detect malformed records. Only a
-first non-whitespace # marks a comment; Room #5 remains ordinary data.
-
-main.cpp currently handles startup and the optional data-directory argument.
-The default is data/ relative to the working directory. No absolute campus
-data path or sample records are embedded in the application.
-
-CUSTOM FACILITY ID HASH TABLE
-HashTable owns an insertion-ordered vector of Facility records and a vector of
-buckets. Each bucket is a growing vector of record indices, implementing
-separate chaining without fixed chain limits or manual heap-node ownership.
-String/vector ownership automatically releases storage. Copies keep their own
-records and matching bucket indices.
-
-The initial bucket count is the named DEFAULT_CAPACITY constant, currently 17,
-or a positive constructor parameter. Zero capacity throws invalid_argument.
-Capacity counts buckets, not maximum records. Chains grow dynamically, so there
-is no full-table rejection or arbitrary record limit and no resizing is needed.
-
-IDs are trimmed and uppercased before validation, hashing, insertion, lookup,
-and duplicate comparison. The manually implemented string hash is:
+FACILITIES AND CUSTOM HASHING
+Facility retains uppercase ID, name, canonical building, and category.
+HashTable owns accepted records in file order and growing bucket chains of
+record indices. ID insertion, duplicate detection, and lookup use only the
+selected bucket, never a library hash container or a full-record ID scan.
+Each ID is trimmed, uppercased, and validated as F plus exactly three digits.
+The custom formula processes the normalized characters in order:
   h0 = 0
   h(i+1) = (31 * h(i) + unsigned ASCII value of key[i]) modulo capacity
-The final h is the bucket index. No std::hash or library hash container is used.
-Both insert and find manually scan only the selected bucket's record indices.
+DEFAULT_CAPACITY is 17; a positive constructor parameter can override it.
+Separate chaining was chosen because chains grow beyond the bucket count,
+avoiding full-table rejection without resizing or an arbitrary record limit.
+One collision is counted per accepted insertion into a previously nonempty
+bucket, not per comparison. Invalid/duplicate IDs change no records or counts.
+Lookup is expected O(1 + n/b), worst O(n), for n records and b buckets;
+storage is O(b + n), plus record text. Vector ownership releases all storage.
 
-Separate chaining was chosen because it handles collisions without probing,
-does not become full when entries exceed the bucket count, and works directly
-with dynamically sized standard vectors. Accepted records remain in input order
-independently of bucket order, supporting the required facility display.
+FacilityDatabase validates field counts, nonempty fields, IDs, and references
+against the graph's accepted building names, retaining their first spelling.
+Category matching scans only accepted records to preserve the first accepted
+category spelling; rejected records cannot register an ID or category.
+Warnings include filename, physical line, and reason. Summaries include both
+load counts and hash capacity/entries/collisions. Display preserves file order.
+ID search distinguishes invalid, normalized not found, and complete found.
+Record pointers expire on the next load. Categories are not another hash table.
 
-One collision is counted for each accepted insertion into a bucket that already
-contains at least one record. It is not one collision per comparison. Duplicate
-or invalid IDs do not change the first record, entry count, or collision count.
-The counter changes only after both the record and chain index are stored;
-record insertion is rolled back if allocating the chain index fails.
+CAMPUS GRAPH
+Sulav's CampusGraph uses a vector of building names and an adjacency list of
+neighbor-index vectors. This fits sparse campus connections in O(V + E)
+storage and naturally preserves building and neighbor insertion order.
+An accepted undirected edge updates both endpoints and increments the total
+once. Duplicate/reversed edges, self-connections, and unknown references are
+rejected. Building matching ignores case and outer whitespace.
+BFS uses std::queue, a visited vector marked at enqueue, and edge distances.
+It visits neighbors in insertion order, includes the start at distance zero,
+and handles isolated and unknown starts. BFS runs in O(V + E).
+The same representation also supports the supplied Final graph methods;
+the Milestone 1 menu exposes only the required Milestone 1 operations.
 
-insert returns Inserted, DuplicateId, or InvalidId. find returns a const pointer
-or nullptr. Callers distinguish an invalid search from a valid missing search
-using isValidFacilityId. Returned record pointers can expire after a later
-accepted insertion grows the record vector. records() supplies a read-only
-sequence for future display/name/category scans, never for ID lookup.
+DEPARTMENT TREE
+Aqani's general tree owns children with unique_ptr in insertion-ordered vectors;
+a non-owning parent pointer supports search details and depth calculation.
+It is not binary. File parents must already exist; the first root uses NONE.
+If an accepted department is actually named NONE, later references to it are
+ordinary parent references. Duplicate names are rejected ignoring case.
+The first menu addition creates a root without asking for a parent; later
+additions require an existing parent and affect memory only. Search reports
+name, parent (None for root), direct children, and edge depth. Recursive
+preorder powers both four-space-indented hierarchy and separate unindented
+traversal. Search/traversals are O(D) for D departments. Owned nodes are freed
+when the tree is destroyed; copying the tree is disabled.
 
-Capacity, entries, and accepted-insertion collisions are available separately
-and through displayDiagnostics, ready to append to the facilities load summary.
-The independent hash-test fixture in testdata/hash-collision contains F001,
-f014, and F027, which normalize into bucket 11 at capacity 17. A duplicate and
-an invalid ID are rejected; the observed diagnostic is capacity=17 entries=3
-collisions=2. Full application file loading is not claimed by this test driver.
-
-For n entries, b buckets, and load factor alpha = n/b, lookup and duplicate
-checking take expected O(1 + alpha) time for distributed keys and O(n) worst
-case in one bucket. Hashing takes O(k) for a key of length k, fixed at four for
-valid IDs. Accepted append work is amortized O(1), plus copying record text.
-Storage is O(b + n), plus the record strings. Constructor initialization is O(b).
-
-FACILITY DATABASE
-FacilityDatabase owns the ID table and accepts the graph's vector of accepted
-building names. It does not implement a second building loader or graph. Each
-load replaces prior facility data, preserving the configured bucket capacity.
-Missing files leave the database empty and print both an error and zero summary.
-
-The loader reads complete lines, skips blank/comment lines, and validates field
-count, required text, normalized ID format, and an accepted building reference.
-It stores the graph's first accepted building spelling and only then attempts
-hash insertion. Each rejection prints filename, physical line number, and reason.
-Every load attempt prints accepted/rejected counts, capacity, entries, collisions.
-
-Category spelling is found by scanning only earlier accepted records. No rejected
-record can register a category. This is a category comparison, not an ID lookup;
-findById and displaySearchById always delegate ID lookup to HashTable::find.
-Ordered display reuses records() and displayFacility for complete records and
-computed totals. Search clearly distinguishes invalid, not found, and found.
-Pointers returned by the database expire on its next load, including failed loads.
-
-For f facility lines, b accepted buildings and n accepted facilities, loading
-uses O(f*b + f*n) comparisons in the worst case, plus parsing record text. This
-includes building/category scans and worst-case hash chains. Display is O(n)
-plus output length; ID lookup keeps the table's expected O(1 + alpha) bound.
-
-NOT YET INTEGRATED
-The startup entry point does not yet call FacilityDatabase or provide the menu.
-The facilities component is verified independently; Step 4 must connect it to
-the shared graph and tree startup/menu with the required file loading order.
-
-The graph and department-tree implementations remain outside this branch's
-completed scope. Their representations, file loading, BFS, and menu integration
-must be added before Milestone 1. This module does not replace those requirements.
+MENU AND VERIFICATION
+Choices 1-9 and 0 follow the required Milestone 1 numbering. getline accepts
+names with spaces; isolated integer parsing rejects blanks, text, decimals,
+suffixes, overflow, and out-of-range choices without damaging the input stream.
+End of input exits cleanly. Component and scripted application tests cover
+validation, ordering, collisions, BFS, tree operations, and recovery.
+Actual UNT CSE CELL verification and final packaging remain Step 5 work.

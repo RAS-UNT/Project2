@@ -1,7 +1,8 @@
-PROJECT 2 TEST RESULTS - STEPS 1 THROUGH 3
+PROJECT 2 TEST RESULTS - STEPS 1 THROUGH 4
 
 Date: 2026-11-08
-Scope: foundations, custom hashing, and the facilities component; not a completed Milestone 1.
+Scope: integrated Milestone 1 components and menu. Actual CELL verification and
+final submission packaging remain pending.
 
 BUILD ENVIRONMENTS
 Local Linux: Ubuntu under WSL2, GCC 13.3.0, C++17.
@@ -156,10 +157,103 @@ Facility database sanitizer commands:
 Expected: all checks pass with normal exit and no sanitizer diagnostics.
 Actual: all 91 checks passed, exit 0, no sanitizer diagnostics. Result: PASS.
 
-REMAINING MILESTONE 1 TESTS
+HISTORICAL STEP 3 STATUS (SUPERSEDED BY STEP 4 RESULTS BELOW)
 Shared building/connection/department loaders, graph/BFS, department tree, all
 four-file startup summaries, and repeating-menu/input-recovery tests remain
 pending integration. Facility-component validation, display, ID lookup, and
 collision load summaries are verified above. Later steps must add the corresponding
 Section 10 test inputs, expected results, actual results, and pass/fail records.
 WSL/GCC and Windows results do not satisfy the separate CELL verification rule.
+
+
+TEAMMATE-REPORTED GRAPH RESULTS BEFORE INTEGRATION (MEMBER B)
+
+Scope: CampusGraph class (include/CampusGraph.h, src/CampusGraph.cpp) only.
+Environment: Linux, g++ -std=c++11 -Wall -Wextra -Wpedantic, no warnings.
+Method: a small test driver (test_graph_main.cpp) loads buildings.txt and connections.txt from a
+given directory and offers the graph menu options. Each test below was run by feeding a prepared
+input file to the driver. Directories: data = instructor files; bad, tie, empty = Member B's own files.
+These results were produced in a Linux environment. A re-run by Member B on a local machine and on
+the UNT CSE CELL machines is still pending.
+
+Test | Description and input | Expected | Actual | Result
+G01 | View graph, data | Observatory shows (no connections); neighbors in insertion order | 7 buildings and 6 connections accepted; Library: Student Union, Business Building; Observatory: (no connections) | PASS
+G02 | Counts and degrees, data | 7 buildings, 6 connections, Student Union degree 3, Observatory 0 | Matched; degrees 2,3,2,1,2,2,0 | PASS
+G03 | BFS from "library" (lowercase), data | 6 of 7; Engineering Building at distance 3 | Matched; start at distance 0, Reachable: 6 of 7 buildings | PASS
+G04 | BFS from Observatory (isolated), data | Only Observatory, 1 of 7 | Matched | PASS
+G05 | BFS from unknown building Mars, data | Error, back to menu | Error: unknown building 'Mars'. | PASS
+G06 | BFS with blank name, data | Blank-name error, back to menu | Error: building name cannot be blank. | PASS
+G07 | Bad files (duplicate building by capitalization, wrong field counts, reversed duplicate, self-connection, unknown buildings, empty field, Windows line endings), bad | Each rejection reported with filename, line number, reason | buildings.txt 4 accepted, 2 rejected; connections.txt 2 accepted, 7 rejected; every warning showed filename, line number and reason | PASS
+G08 | Connectivity report with multiple components, bad | 2 connected components | Connected components: 2 | PASS
+G09 | Shortest path, start equals destination (Library to Library), data | Library and 0 connections | Matched | PASS
+G10 | Shortest path, unknown start (Mars to Gym), data | Unknown start building error | Error: unknown start building 'Mars'. | PASS
+G11 | Shortest path, unknown destination (Gym to Mars), data | Unknown destination building error | Error: unknown destination building 'Mars'. | PASS
+G12 | Shortest path, no route (Library to Observatory), data | No-path message | No path exists between Library and Observatory. | PASS
+G13 | Two equal-length routes (Library to Gym), data | Library, Student Union, Gym; 2 connections | Matched | PASS
+G14 | Two equal-length routes in Member B's own test data (A to D), tie | A, B, D; 2 connections (B is A's first neighbor) | Matched | PASS
+G15 | Connectivity report with a tie for highest degree, tie | Highest degree (2): A, B, C, D; no isolated buildings; 1 component | Matched; Total connections: 4 | PASS
+G16 | Connectivity report with an isolated building, data | Highest degree (3): Student Union; Isolated: Observatory; 2 components | Matched | PASS
+G17 | Missing buildings.txt and connections.txt (directory does not exist) | Error naming each file, 0 accepted, no crash | Both errors printed; 0 accepted, 0 rejected; menu options reported "No buildings are loaded." | PASS
+G18 | Empty files, empty | Empty-state messages, zero totals, no crash | "No buildings are loaded." and zero totals printed; components 0 | PASS
+
+STEP 4 INTEGRATED APPLICATION VERIFICATION
+Date: 2026-11-08. Inputs: unchanged instructor data/, plus the team's static
+testdata/ fixtures and isolated generated cases under ignored build/.
+Branches combined: facilities-hash 1f23e66, main 63e35d2 (Sulav's graph), and
+department-tree 1a4e424 (Aqani's tree). The integration commit is not yet made.
+
+Actual verification:
+- WSL/Ubuntu GCC 13.3.0, -std=c++17 -Wall -Wextra -pedantic: clean compilation.
+- Foundation checks: all 35 passed.
+- Hash-table checks: all 2063 passed; collision fixture: all 15 passed.
+- Facility-database checks: all 91 passed.
+- Department checks: all 34 passed, including the formerly missing fixtures.
+- Scripted application cases: all 55 passed.
+- Windows/MSVC 19.51 Release, CMake/Ninja: all 10 CTest suites passed.
+- AddressSanitizer/UndefinedBehaviorSanitizer: all 55 application cases passed,
+  no sanitizer diagnostics, normal suite exit.
+- Instructor data hashes were identical before and after the menu operations.
+
+Reproduce the complete Linux checks:
+  bash tests/run_linux_checks.sh
+
+Sanitized application checks:
+  g++ -std=c++17 -Wall -Wextra -pedantic -g -fsanitize=address,undefined -fno-omit-frame-pointer -Iinclude src/*.cpp -o build/linux/campus_sanitized
+  ASAN_OPTIONS=detect_leaks=1 python3 tests/MenuIntegrationTests.py build/linux/campus_sanitized
+
+Test | Description and input | Expected | Actual | Result
+I01 | Default startup, then 0 | Four files load buildings/connections/facilities/departments in order; exact choices 1-9 and 0 | Matched | PASS
+I02 | Menu 1, then 0 | Ten accepted instructor facilities displayed in file order with total 10 | Matched | PASS
+I03 | Menu 2 with padded lowercase f004 | Complete normalized F004 record and canonical building/category | Matched | PASS
+I04 | Menu 2 with f999 | Not-found message includes F999 | Matched | PASS
+I05 | Seven invalid ID inputs, each followed by valid f004 | Format error then working valid lookup | All seven cases matched | PASS
+I06 | Menu 3 | Library neighbors retain Student Union, Business Building order; Observatory has no connections | Matched | PASS
+I07 | Menu 4 | Seven buildings, six undirected edges, correct degrees | Matched | PASS
+I08 | Menu 5 from lowercase/padded Library | BFS order Library, Student Union, Business Building, Science Building, Gym, Engineering Building; distances 0,1,1,2,2,3; reachable 6/7 | Matched | PASS
+I09 | BFS from Observatory, unknown building, blank, and Student  Union | Isolated start gives 1/7; unknown/blank errors; internal spaces significant; recovery works | All four cases matched | PASS
+I10 | Department root, leaf, missing, and blank searches | Correct name/parent/children/depth or specific error | All four cases matched | PASS
+I11 | Menu 8 versus 9 | Same preorder, hierarchy indented four spaces per depth; plain traversal unindented | Both cases matched | PASS
+I12 | Add Robotics Lab under Computer Science, then search/display | Child accepted in memory; depth 3; hierarchy count becomes 8 | Matched | PASS
+I13 | Duplicate department, unknown parent, blank name, blank parent | Rejections with no unwanted additions or broken input state | All four cases matched | PASS
+I14 | Empty four-file fixture | Four zero summaries, empty displays, zero counts, no crash | Matched | PASS
+I15 | Empty-tree addition, then root-only search/preorder | No parent prompt; parent None, zero children, depth 0 | Matched | PASS
+I16 | Empty root followed by child with spaced/case-varied parent | Correct in-memory parent and depth 1 | Matched | PASS
+I17 | integration-invalid fixture | Buildings 3/2, connections 1/5, facilities 2/5 with one collision, departments 3/7; 19 warnings; accepted records/BFS/tree still usable | Matched | PASS
+I18 | App with hash-collision directory | Facilities accepted=3 rejected=2 capacity=17 entries=3 collisions=2; first duplicate record retained | Matched | PASS
+I19 | Generated CRLF files, lowercase facility ID, directory containing spaces | Same accepted totals and canonical search/BFS/preorder behavior | Matched | PASS
+I20 | All input files missing | Four named errors and zero summaries; empty operations and exit still work | Matched | PASS
+I21 | Only departments.txt missing, then add/search root | Other modules load; missing summary zero; root added without parent prompt | Matched | PASS
+I22 | Department root actually named NONE, then Child with parent NONE | Both records accepted; Child has parent NONE and depth 1 | Matched | PASS
+I23 | Nine invalid menu inputs including blank/text/range/decimal/suffix/overflow | Error and successful subsequent menu operation | All nine cases matched | PASS
+I24 | EOF at menu, ID, BFS, new department, and parent prompts | Normal exit within timeout, no infinite loop | All five cases matched | PASS
+I25 | Exit 0 without final newline | Normal exit | Matched | PASS
+I26 | Blank data-directory argument and extra CLI arguments | Named usage/argument error, exit 1 | Both cases matched | PASS
+
+Integration fixes were exercised rather than assumed: department source/test
+locations now match CMake; malformed-fixture physical lines match its tests;
+missing department files print a zero-count summary; plain preorder is distinct
+from hierarchy; a real parent named NONE is not mistaken for a new root marker.
+
+Final Step 5 still requires a submission audit, actual UNT CSE CELL compilation
+and execution, and a ZIP built from the final committed/pushed source matching
+GitHub. No remote CELL pass is claimed by these local checks.

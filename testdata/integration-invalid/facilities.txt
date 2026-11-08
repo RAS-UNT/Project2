@@ -1,0 +1,8 @@
+# FacilityID|FacilityName|BuildingName|Category
+f001|Room #5|library|Classroom
+F014|Room #5|STUDENT UNION|classroom
+f001|Duplicate|Library|Poison
+F002|Ghost|Missing|Lab
+BAD|Bad ID|Library|Lab
+F003|Blank Category|Library|
+F004|Too|Many|Fields|Extra

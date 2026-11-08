@@ -2,133 +2,126 @@ PROJECT 2 - SMART CAMPUS NAVIGATION AND FACILITY ANALYTICS
 
 Repository: https://github.com/RAS-UNT/Project2
 
-CURRENT STATUS
-Step 3: custom hashing plus facility file loading, display, and ID search.
-This is NOT a completed Milestone 1 submission. The facilities component is
-implemented and tested, but campus graph, BFS, department tree, four-file
-startup loading, and the required menu are not integrated on this branch yet.
-The campus executable still prints its selected data directory; component
-tests exercise the facility loader and searches until Step 4 menu integration.
+PURPOSE AND STATUS
+C++17 console application for campus facility lookup, graph exploration,
+BFS reachability, and department hierarchy management. Step 4 connects all
+Milestone 1 modules and menu operations. Step 5 submission checks, actual CELL
+verification, and the final matching ZIP are still pending.
 
-IMPLEMENTED
-- Facility record containing ID, name, building, and category.
-- Facility ID normalization and F-plus-three-digits validation.
-- Shared whitespace trimming, ASCII case-insensitive comparison keys,
-  pipe-delimited parsing that preserves empty fields, and comment detection.
-- Optional data-directory argument, with data/ as the default.
-- Foundation tests and CMake build configuration.
-- Custom polynomial ID hashing and separate chaining with 17 default buckets.
-- Case-insensitive ID insertion/lookup and rejection of invalid or duplicate IDs.
-- Accepted record order, capacity/entry/collision diagnostics, and collision tests.
-- FacilityDatabase loads complete records against accepted building names.
-- Filename/line/reason warnings, load summaries, and empty/missing-file recovery.
-- Canonical building/category spelling and ordered facility display with totals.
-- ID search distinguishes invalid format, valid not found, and complete matches.
+MODULE OWNERS
+Rami Badr: facilities, custom ID hash table, and shared application integration.
+Sulav Bhattarai: CampusGraph, building/connection loading, and BFS.
+Aqani: department tree, loading, menu actions, and department component tests.
+See CONTRIBUTIONS.txt for completed tasks and integration fixes.
 
 BUILD AND RUN WITH CMAKE
-Run from the project root using a C++17 compiler:
+From the project root, with a C++17 compiler and CMake 3.10 or newer:
   cmake -S . -B build
   cmake --build build
   ./build/campus
   ./build/campus testdata/hash-collision
+  ./build/campus testdata/integration-invalid
 
 Run tests:
   cd build
   ctest --output-on-failure
   cd ..
 
-CTest now runs eight suites: the five foundation/startup suites, table unit
-tests, hash-collision fixture, and facility database tests. Direct invocations:
-  ./build/hash_table_tests
-  ./build/hash_table_tests testdata/hash-collision
-  ./build/facility_database_tests . build
+Nine component/startup suites are always registered. A working Python 3
+interpreter adds the tenth suite, containing 55 full-application menu cases.
 
-BUILD WITHOUT CMAKE ON LINUX
+BUILD AND TEST WITHOUT CMAKE ON LINUX
+The application itself needs only a C++17 compiler:
   mkdir -p build
-  g++ -std=c++17 -Wall -Wextra -pedantic -Iinclude src/main.cpp src/Facility.cpp src/TextUtils.cpp src/HashTable.cpp src/FacilityDatabase.cpp -o build/campus
-  g++ -std=c++17 -Wall -Wextra -pedantic -Iinclude tests/FoundationTests.cpp src/Facility.cpp src/TextUtils.cpp src/HashTable.cpp src/FacilityDatabase.cpp -o build/foundation_tests
-  g++ -std=c++17 -Wall -Wextra -pedantic -Iinclude tests/HashTableTests.cpp src/Facility.cpp src/TextUtils.cpp src/HashTable.cpp src/FacilityDatabase.cpp -o build/hash_table_tests
-  g++ -std=c++17 -Wall -Wextra -pedantic -Iinclude tests/FacilityDatabaseTests.cpp src/Facility.cpp src/TextUtils.cpp src/HashTable.cpp src/FacilityDatabase.cpp -o build/facility_database_tests
-  ./build/foundation_tests
-  ./build/hash_table_tests
-  ./build/hash_table_tests testdata/hash-collision
-  ./build/facility_database_tests . build
+  g++ -std=c++17 -Wall -Wextra -pedantic -Iinclude src/*.cpp -o build/campus
   ./build/campus
+
+For all component and menu checks, using GCC and Python 3:
+  bash tests/run_linux_checks.sh
+
+The script builds under build/linux and runs the four component executables,
+the collision fixture, and all 55 application menu cases. You can also run:
+  python3 tests/MenuIntegrationTests.py build/linux/campus
+
+STARTUP AND DATA
+The optional argument selects a data directory; the default is data/ relative
+to the working directory. Run from the project root for the default files.
+Startup loads buildings.txt, connections.txt, facilities.txt, departments.txt
+in that order. Facilities refer only to accepted graph building names.
+Warnings show filename, physical line, and rejection reason. Each file has an
+accepted/rejected summary; facilities also show capacity, entries, collisions.
+Missing files are treated as empty without stopping the remaining startup/menu.
+All counts and search results come from accepted input records.
+
+The four instructor files in data/ remain unchanged. Own static fixtures live
+in testdata/. Generated CRLF and menu-test inputs stay under ignored build/.
+Department menu additions affect memory only and disappear when the app exits.
+
+MILESTONE 1 MENU
+  1. View all facilities
+  2. Search facility by ID
+  3. View campus graph
+  4. Display graph counts and degrees
+  5. Find reachable buildings (BFS)
+  6. Add department
+  7. Search department
+  8. Display department hierarchy
+  9. Run preorder traversal
+  0. Exit
+
+Names accept spaces and ignore capitalization and surrounding whitespace;
+internal spaces remain significant. ID inputs normalize to uppercase F plus
+exactly three digits. Search distinguishes invalid input, valid not found,
+and a complete matching record. Duplicate facility names with different IDs
+remain separate records. Facility display preserves accepted file order.
+
+The graph preserves neighbor insertion order; BFS includes the starting
+building at distance zero and prints its reachable count out of all buildings.
+A department added to an empty tree becomes the root without a parent prompt.
+Otherwise enter an existing parent. Hierarchy output indents four spaces per
+depth; option 9 prints the same preorder sequence without indentation.
+
+Invalid menu input reports an error and returns to the menu. Enter one whole
+number from 0 to 9. Closing input also exits normally.
+
+HASH FUNCTION AND COLLISIONS
+Normalized IDs use a custom character hash:
+  h = (31 * h + unsigned character value) % capacity, starting at zero
+Capacity defaults to the named constant 17 and counts buckets, not a record
+limit. Separate chains grow dynamically. One accepted insertion into a
+nonempty bucket counts as one collision; duplicate/invalid IDs add none.
+ID lookup scans only its bucket. The read-only accepted record list is used
+for display and category spelling, not as a replacement for hashed ID lookup.
+
+testdata/hash-collision uses F001, f014, and F027 in the same bucket. Run:
   ./build/campus testdata/hash-collision
+The real startup summary includes:
+  accepted=3 rejected=2 capacity=17 entries=3 collisions=2
 
-HASH TABLE
-HashTable normalizes each facility ID before validation, hashing, and comparison.
-Its custom formula starts at h = 0 and processes each character with:
-  h = (31 * h + unsigned character value) % capacity
-Each bucket holds a growing vector of indices into the accepted record list.
-Insertion and lookup scan only the selected bucket. No library hash table,
-library hash function, or full-record scan is used for ID lookup.
-
-A collision means one accepted insertion into an already nonempty bucket,
-regardless of the chain length. Invalid and duplicate IDs do not change entries,
-collisions, or the first accepted record. The bucket count is not a record limit;
-separate chaining allows records to exceed capacity without resizing.
-
-The read-only records() sequence keeps accepted insertion order for facility
-display. A pointer returned by find() may be invalidated by a
-later accepted insertion; use it immediately or perform the lookup again.
-
-COLLISION DEMONSTRATION
-The team's own testdata/hash-collision directory contains all four input files.
-With capacity 17, IDs F001, F014, and F027 share bucket 11. The fixture also
-contains a lowercase duplicate and an invalid ID. The hash-test driver prints:
-  facilities.txt: accepted=3 rejected=2 capacity=17 entries=3 collisions=2
-FacilityDatabase now loads the same fixture with full facility validation and
-prints its filename, warnings, acceptance counts, and these hash diagnostics.
-Full application startup/menu wiring remains Step 4 work.
-
-FACILITY DATABASE AND INTEGRATION CONTRACT
-The graph module must supply a vector<string> containing ONLY accepted building
-names, in canonical spelling and insertion order. No graph class is duplicated
-inside the facility module. After buildings/connections are loaded, main can use:
-  FacilityDatabase facilities;
-  facilities.loadFromFile(dataDirectory + "/facilities.txt", acceptedBuildings, std::cout);
-  facilities.displayAll(std::cout);
-  facilities.displaySearchById(enteredId, std::cout);
-
-Include FacilityDatabase.h. loadFromFile returns FacilityLoadSummary with opened,
-accepted, and rejected fields. It replaces prior facilities on each load attempt;
-a missing file leaves the database empty, prints a named error, and still prints
-a zero-count summary. Callers should continue loading the other files.
-
-Every accepted record has four nonempty fields, a normalized valid ID, and a
-known building matched case-insensitively. The stored building uses the first
-accepted spelling from the supplied building list. Categories reuse the spelling
-from the first accepted facility in that category. Rejected records never
-register IDs or category spellings. Duplicate names with different IDs are kept.
-
-displayAll prints all four fields in accepted file order and a total, including
-an explicit empty message and zero total. displaySearchById normalizes input,
-explains invalid ID format, includes the normalized ID when missing, and prints
-all fields when found. ID lookup delegates only to the custom hash table.
-findById provides read-only programmatic lookup; pointers expire on the next load.
-
-testdata/facility-validation covers rejected records, category spelling, comments,
-whitespace, and ordering. testdata/facility-empty contains empty inputs. Tests
-derive a CRLF copy under build/ without modifying the source fixtures or data/.
+GRAPH AND TREE REPRESENTATIONS
+CampusGraph uses an adjacency list, updating both endpoints and counting each
+edge once. BFS uses a queue and marks visited at enqueue. DepartmentTree is a
+general tree with a vector of owned children per node, not a binary tree.
+See design_document.txt for rationale, validation, and complexity details.
+The supplied graph's Final shortest-path/report methods remain in the source
+but are not exposed as extra Milestone 1 menu choices.
 
 DIRECTORY LAYOUT
-  include/           Facility, HashTable, FacilityDatabase, and text utility headers
-  src/               Implementations and application entry point
-  data/              Four unchanged instructor-provided starter files
-  testdata/          hash-collision/, facility-validation/, and facility-empty/
-  tests/             Automated C++ tests
-  CMakeLists.txt     Build and test targets
-  CONTRIBUTIONS.txt  Verified completed work and ownership status
+  include/           Module headers only
+  src/               Implementations and main.cpp
+  data/              Four unchanged instructor starter files
+  testdata/          Collision, facility, department, and integration fixtures
+  tests/             Component tests, menu tests, Linux test script
+  CMakeLists.txt     Libraries, application, and test targets
+  README.txt
+  CONTRIBUTIONS.txt
   design_document.txt
   test_results.txt
-  .gitignore
+  .gitignore         Excludes builds, binaries, and editor files
 
-DATA
-The four starter files come from the instructor's data (1).zip. Keep them
-unchanged. Future loaders must read buildings, connections, facilities, and
-departments in that order and compute results from accepted records.
-
-VERIFICATION
-See test_results.txt for the exact checks executed so far. Local WSL/GCC tests
-are not actual UNT CSE CELL verification. CELL testing remains required.
+VERIFICATION AND SUBMISSION
+Local WSL/GCC and Windows/MSVC checks do not count as actual CELL execution.
+See test_results.txt for recorded results and remaining verification.
+Before submitting, commit/push the final source, test on CELL, and create the
+ZIP from that committed source so required files match the GitHub repository.
+Do not include executables or build directories.

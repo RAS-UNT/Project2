@@ -1,0 +1,11 @@
+# DepartmentName|ParentName
+Wrong First|Missing
+University|NONE
+College|UNIVERSITY
+college|University
+Second Root|NONE
+Unknown Child|Missing Parent
+|University
+Broken
+Late Child|Late Parent
+Late Parent|University

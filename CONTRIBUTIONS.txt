@@ -35,12 +35,44 @@ Rami Badr:
   address/undefined-behavior sanitizer run under WSL/GCC.
 - Documented the accepted-building-list API for graph/menu integration.
 
-Proposed ownership, not yet confirmed by all members:
+Module ownership confirmed by the submitted branches:
 - Rami: facilities, custom ID hash table, and facility ID lookup.
-- Graph/BFS owner: awaiting team confirmation.
-- Department-tree owner: awaiting team confirmation.
+- Sulav: campus graph, BFS reachability, shortest path, and connectivity report.
+- Aqani (AQani2222): department tree, loading, menu actions, and component tests.
 
 Other team members: Aqani and Sulav Bhattarai.
-Record their owned modules and completed work after they confirm and contribute.
+Their completed module contributions are recorded below.
 Shared loading/menu integration, tests, and documentation will be recorded as
 they are completed. This file must reflect actual work, not planned credit.
+
+Completed work - Sulav Bhattarai (Member B):
+- Added CampusGraph (include/CampusGraph.h, src/CampusGraph.cpp): adjacency-list graph.
+- Added buildings.txt and connections.txt loading with validation and warnings.
+- Added graph display, counts and degrees, BFS reachability, shortest path, and connectivity report.
+- Added the graph_core library to CMakeLists.txt.
+
+Completed work - Aqani (department-tree branch):
+- Added DepartmentNode/DepartmentTree with owned children, parent pointers,
+  root/child insertion, case-insensitive search, depth, and indented hierarchy.
+- Added DepartmentLoader file parsing, rejection reasons, and parent validation.
+- Added DepartmentMenu root/child addition, search, and hierarchy actions.
+- Added DepartmentTreeTests and the malformed-department input records.
+- Submitted commits from 55bca0c through 1a4e424 under AQani2222.
+
+Completed work - Step 4 integration (Rami Badr):
+- Combined main at 63e35d2 and department-tree at 1a4e424 with facilities-hash,
+  preserving both module histories for the integration merge commit.
+- Wired the required four-file loading order and nine-choice Milestone 1 menu
+  with option 0 exit, complete-line input, strict numeric parsing, and EOF exit.
+- Connected the graph's accepted building names to facility validation.
+- Moved department implementations to src/, tests to tests/, and fixtures to
+  testdata/; added the missing malformed/empty fixtures and required comments.
+- Added the missing unindented preorder operation and filename/count department
+  summaries, including missing-file summaries. Kept valid parents named NONE
+  usable instead of treating every NONE reference as another root declaration.
+- Preserved Aqani's tree/menu logic and Sulav's graph/BFS algorithms while
+  fixing their integration and diagnostics; no graph neighbor sorting was added.
+- Added 55 scripted application cases, the integration-invalid test directory,
+  and a reproducible Linux check script. All 10 CTest suites passed on Windows;
+  all Linux checks and the full-menu sanitizer run passed. CELL is still pending.
+- Reconciled the shared design conflict and updated README/test evidence.

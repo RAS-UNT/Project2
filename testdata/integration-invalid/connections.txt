@@ -1,0 +1,7 @@
+# BuildingA|BuildingB
+LIBRARY|student union
+Student Union|Library
+Library|Library
+Library|Unknown
+Library|Student Union|Extra
+Library|

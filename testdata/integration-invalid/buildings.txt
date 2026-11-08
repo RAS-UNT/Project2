@@ -1,0 +1,6 @@
+# BuildingName
+Library
+ library
+Student Union
+Invalid|Building
+Observatory
