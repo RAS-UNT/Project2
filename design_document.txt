@@ -24,3 +24,7 @@ step. No hash lookup or collision demonstration is claimed in this version.
 The graph and department-tree modules await ownership confirmation. Their
 representations, file loading, BFS, and required menu integration must be added
 before Milestone 1. This foundation does not replace those requirements.
+
+Campus graph (Member B)
+The campus graph is an undirected, unweighted graph stored as an adjacency list: a vector of building names plus, for each building, a vector of neighbor indexes. I chose an adjacency list because a campus has few connections per building, so memory grows with buildings plus connections instead of buildings squared, and neighbors naturally stay in the order they were added, which the assignment requires and which BFS depends on. Each accepted connection is added to both buildings' lists and counted once. Duplicate and reversed connections, self-connections and unknown buildings are rejected while loading. Buildings are looked up by a case-insensitive, trimmed scan of the name list, and the graph keeps the spelling from buildings.txt.
+BFS reachability and shortest path both use std::queue and a visited vector that is marked when a building is added to the queue. Shortest path records each building's predecessor and rebuilds the path backward, so the first-discovered neighbor order breaks ties. The connectivity report counts components by running BFS from every unvisited building. The class is CampusGraph (include/CampusGraph.h, src/CampusGraph.cpp).
