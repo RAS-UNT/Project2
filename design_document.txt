@@ -1,0 +1,26 @@
+PROJECT 2 DESIGN - STEP 1
+
+IMPLEMENTED FOUNDATION
+Facility is a record with ID, name, building, and category strings. Display
+spelling remains separate from normalized comparison keys. ID normalization
+trims outer whitespace and uppercases ASCII letters before format validation.
+Valid IDs contain F followed by exactly three digits, including F000.
+
+TextUtils provides consistent rules for all future loaders and name searches.
+Trimming handles whitespace including tabs and carriage returns. Internal
+spaces are preserved and significant. Pipe splitting retains empty fields,
+including trailing fields, so loaders can detect malformed records. Only a
+first non-whitespace # marks a comment; Room #5 remains ordinary data.
+
+main.cpp currently handles startup and the optional data-directory argument.
+The default is data/ relative to the working directory. No absolute campus
+data path or sample records are embedded in the application.
+
+NOT YET IMPLEMENTED
+The custom hash function, hash-table capacity, collision strategy and collision
+counting definition must be implemented and documented in the next facilities
+step. No hash lookup or collision demonstration is claimed in this version.
+
+The graph and department-tree modules await ownership confirmation. Their
+representations, file loading, BFS, and required menu integration must be added
+before Milestone 1. This foundation does not replace those requirements.

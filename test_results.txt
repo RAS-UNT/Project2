@@ -1,0 +1,62 @@
+PROJECT 2 TEST RESULTS - STEP 1
+
+Date: 2026-11-08
+Scope: Step 1 foundation only, not a completed Milestone 1.
+
+BUILD ENVIRONMENTS
+Local Linux: Ubuntu under WSL2, GCC 13.3.0, C++17.
+Flags: -Wall -Wextra -pedantic. Both targets compiled without warnings.
+Additional local check: MSVC 19.51.36243.0, CMake/Ninja, Release build.
+No actual UNT CSE CELL execution has been performed.
+
+COMMANDS USED ON LINUX
+  mkdir -p build/linux
+  g++ -std=c++17 -Wall -Wextra -pedantic -Iinclude src/main.cpp src/Facility.cpp src/TextUtils.cpp -o build/linux/campus
+  g++ -std=c++17 -Wall -Wextra -pedantic -Iinclude tests/FoundationTests.cpp src/Facility.cpp src/TextUtils.cpp -o build/linux/foundation_tests
+  ./build/linux/foundation_tests
+
+Actual output: All 35 foundation checks passed.
+
+FOUNDATION TEST GROUPS
+Test | Description and input | Expected | Actual | Result
+P01 | Outer whitespace: spaces, tabs, CR, LF around Library | Library | Library | PASS
+P02 | Empty and whitespace-only strings | Empty result | Empty result | PASS
+P03 | Student  Union with two internal spaces | Internal spaces preserved | Preserved | PASS
+P04 | student union with outer whitespace | STUDENT UNION comparison key | STUDENT UNION | PASS
+P05 | Student  Union versus Student Union | Different keys | Different keys | PASS
+P06 | Blank lines and leading-whitespace # comment | Ignored by comment/blank predicate | Recognized | PASS
+P07 | Room #5 | Ordinary data, not a comment | Ordinary data | PASS
+P08 | Four pipe fields with outer whitespace and CRLF | Four trimmed fields; spelling retained | Exact fields retained | PASS
+P09 | Trailing, leading, and middle empty fields | Empty positions retained | Retained | PASS
+P10 | Extra field and empty record | Full field count retained for later validation | Retained | PASS
+P11 | Lowercase f004 with surrounding whitespace | F004 | F004 | PASS
+P12 | F000, F001, F999, f004, padded F004 | Valid after normalization | Accepted | PASS
+P13 | Empty ID, wrong length/prefix, nondigit, internal whitespace, suffix | Invalid | All eleven invalid inputs rejected | PASS
+P14 | Facility record with normalized ID and four fields | ID normalized; other fields preserved | Exact fields retained | PASS
+
+STARTUP CHECKS ON LINUX
+P15 | ./build/linux/campus | Exit 0; Data directory: data/ | Matched | PASS
+P16 | ./build/linux/campus testdata/example | Exit 0; selected directory displayed | Matched | PASS
+P17 | ./build/linux/campus first second | Exit 1; usage error | Matched | PASS
+P18 | ./build/linux/campus " " | Exit 1; blank-directory error | Matched | PASS
+
+INSTRUCTOR DATA INTEGRITY
+P19-P22 | Compare each data/ file to its corresponding archive entry using SHA256
+Expected: byte-for-byte match for buildings.txt, connections.txt, facilities.txt,
+and departments.txt. Actual: all four matched. Result: PASS.
+These are integrity checks, not claims that file-loading validation is complete.
+
+ADDITIONAL CMAKE/CTEST CHECK
+All five registered suites passed under Windows/MSVC:
+- facility_foundation (the same 35 assertions)
+- default_data_directory
+- alternate_data_directory
+- extra_arguments_rejected
+- blank_data_directory_rejected
+
+REMAINING MILESTONE 1 TESTS
+File-loading acceptance/rejection and load summaries, custom hash lookup and
+collision diagnostics, graph/BFS, department tree, and required repeating-menu
+tests remain pending implementation. Later steps must add the corresponding
+Section 10 test inputs, expected results, actual results, and pass/fail records.
+WSL/GCC and Windows results do not satisfy the separate CELL verification rule.

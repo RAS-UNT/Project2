@@ -1,0 +1,22 @@
+PROJECT 2 CONTRIBUTIONS
+
+Completed work - Step 1
+Rami Badr:
+- Created the separate Project2 checkout and initial project layout.
+- Added the Facility record and facility ID normalization/validation.
+- Added shared trimming, matching-key, field-splitting, and comment utilities.
+- Added startup argument handling, CMake targets, and foundation tests.
+- Started the README, design document, and test evidence.
+- Imported the instructor data without changing its contents.
+- Verified 35 foundation checks and four startup checks under WSL/GCC, all five
+  registered CTest suites under MSVC, and SHA256 matches for the four data files.
+
+Proposed ownership, not yet confirmed by all members:
+- Rami: facilities, custom ID hash table, and facility ID lookup.
+- Graph/BFS owner: awaiting team confirmation.
+- Department-tree owner: awaiting team confirmation.
+
+Other team members: Aqani and Sulav Bhattarai.
+Record their owned modules and completed work after they confirm and contribute.
+Shared loading/menu integration, tests, and documentation will be recorded as
+they are completed. This file must reflect actual work, not planned credit.
